@@ -46,9 +46,9 @@ h1, h2 { font-family: Georgia, "Times New Roman", serif; letter-spacing: -.025em
 .warning-note p { margin: 0; }
 .practice-note { justify-content: center; background: #e6ede8; color: var(--forest); }
 .practice-note span { font-weight: 800; padding-right: 10px; border-right: 1px solid var(--line); }
-.game-board { display: grid; gap: 7px; width: min(100%, 330px); margin: 0 auto; }
-.tile-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 7px; }
-.tile { aspect-ratio: 1; border: 1.5px solid #c9c1b3; background: rgba(255,253,248,.75); display: grid; place-items: center; border-radius: 7px; font-size: clamp(23px, 3vw, 31px); font-weight: 750; box-shadow: 0 3px 10px rgba(61,52,36,.035); }
+.game-board { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 7px; width: min(100%, 330px); margin: 0 auto; }
+.tile-row { display: contents; }
+.tile { width: 100%; min-width: 0; aspect-ratio: 1; border: 1.5px solid #c9c1b3; background: rgba(255,253,248,.75); display: grid; place-items: center; border-radius: 7px; font-size: clamp(23px, 3vw, 31px); font-weight: 750; box-shadow: 0 3px 10px rgba(61,52,36,.035); }
 .tile.filled { border-color: #8f958f; transform: scale(1.015); }
 .tile.correct { color: white; background: var(--forest-light); border-color: var(--forest-light); }
 .tile.present { color: #322914; background: var(--gold); border-color: var(--gold); }
