@@ -6,6 +6,7 @@ import type {
   GameSnapshot,
   LeaderboardEntry,
   LeaderboardPeriod,
+  LetterState,
   Play,
   Player,
   PlayerProfile,
@@ -34,6 +35,12 @@ interface SessionChoice {
   mode: PlayMode;
   puzzleKey: string;
 }
+
+const KEYS = [
+  ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p"],
+  ["a", "s", "d", "f", "g", "h", "j", "k", "l"],
+  ["enter", "z", "x", "c", "v", "b", "n", "m", "backspace"],
+];
 
 const PERIOD_LABELS: Record<LeaderboardPeriod, string> = {
   today: "Today",
@@ -224,6 +231,7 @@ export function WordleApp() {
             input={input}
             message={message}
             busy={busy}
+            onKey={handleKey}
             onInput={handleInput}
             onSubmit={() => void submitGuess()}
             onPractice={choosePractice}
@@ -247,6 +255,7 @@ function GameView({
   input,
   message,
   busy,
+  onKey,
   onInput,
   onSubmit,
   onPractice,
@@ -257,12 +266,22 @@ function GameView({
   input: string;
   message: string;
   busy: boolean;
+  onKey: (key: string) => void;
   onInput: (value: string) => void;
   onSubmit: () => void;
   onPractice: (mode: "daily-replay" | "archive") => void;
 }) {
   const completed = game && game.status !== "in-progress";
   const rows = useMemo(() => game?.evaluations ?? [], [game?.evaluations]);
+  const keyStates = useMemo(() => {
+    const priority: Record<LetterState, number> = { absent: 1, present: 2, correct: 3 };
+    const states: Record<string, LetterState> = {};
+    rows.forEach((evaluation) => evaluation.guess.split("").forEach((letter, index) => {
+      const state = evaluation.states[index];
+      if (!states[letter] || priority[state] > priority[states[letter]]) states[letter] = state;
+    }));
+    return states;
+  }, [rows]);
 
   return (
     <section className="game-layout">
@@ -286,6 +305,7 @@ function GameView({
             )}
             <GameBoard evaluations={rows} input={input} disabled={Boolean(completed) || busy} onInput={onInput} onSubmit={onSubmit} />
             <div className="message-line" aria-live="polite">{message || (game?.counted === false ? "Practice scores never affect your ranking." : !completed ? "Tap a tile to type a guess." : "\u00A0")}</div>
+            {!completed && <Keyboard keyStates={keyStates} onKey={onKey} onSubmit={onSubmit} busy={busy} />}
             {completed && <ResultCard game={game} onPractice={onPractice} busy={busy} />}
           </>
         )}
@@ -365,6 +385,28 @@ function GameBoard({
           );
         })}
       </div>
+    </div>
+  );
+}
+
+function Keyboard({ keyStates, onKey, onSubmit, busy }: { keyStates: Record<string, LetterState>; onKey: (key: string) => void; onSubmit: () => void; busy: boolean }) {
+  return (
+    <div className="keyboard" aria-label="On-screen keyboard">
+      {KEYS.map((row, rowIndex) => (
+        <div className="key-row" key={rowIndex}>
+          {row.map((key) => (
+            <button
+              key={key}
+              className={`key ${keyStates[key] ?? ""} ${key.length > 1 ? "wide" : ""}`}
+              onClick={() => key === "enter" ? onSubmit() : onKey(key)}
+              disabled={busy}
+              aria-label={key}
+            >
+              {key === "backspace" ? "⌫" : key.toUpperCase()}
+            </button>
+          ))}
+        </div>
+      ))}
     </div>
   );
 }

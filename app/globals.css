@@ -56,6 +56,15 @@ h1, h2 { font-family: Georgia, "Times New Roman", serif; letter-spacing: -.025em
 .tile.present { color: #322914; background: var(--gold); border-color: var(--gold); }
 .tile.absent { color: white; background: #878a84; border-color: #878a84; }
 .message-line { color: var(--clay); text-align: center; font-size: 12px; min-height: 34px; padding: 10px 0 6px; font-weight: 650; }
+.keyboard { display: grid; gap: 6px; width: min(100%, 540px); margin: 4px auto 0; }
+.key-row { display: flex; justify-content: center; gap: 5px; }
+.key { height: 49px; min-width: 34px; flex: 1; max-width: 48px; border: 0; border-radius: 6px; background: #ddd8ce; color: #303732; font-weight: 750; font-size: 12px; cursor: pointer; box-shadow: 0 2px 0 #c4bdb1; }
+.key:hover { filter: brightness(.96); }
+.key:active { transform: translateY(2px); box-shadow: none; }
+.key.wide { max-width: 72px; font-size: 9px; }
+.key.correct { background: var(--forest-light); color: white; }
+.key.present { background: var(--gold); color: #29200f; }
+.key.absent { background: #858983; color: white; }
 .side-card { background: rgba(255,253,248,.78); border: 1px solid var(--line); border-radius: 22px; box-shadow: var(--shadow); padding: 34px; position: relative; overflow: hidden; }
 .side-card::after { content: ""; position: absolute; width: 180px; height: 180px; border: 1px solid rgba(197,147,55,.16); border-radius: 50%; top: -110px; right: -70px; box-shadow: 0 0 0 18px rgba(197,147,55,.035), 0 0 0 36px rgba(197,147,55,.025); }
 .decorative-cross { color: var(--gold); font-size: 23px; }
