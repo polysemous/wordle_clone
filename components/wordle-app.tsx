@@ -328,6 +328,7 @@ function GameBoard({
   onSubmit: () => void;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
+  const [isTyping, setIsTyping] = useState(false);
   const focusInput = () => {
     if (!disabled) inputRef.current?.focus();
   };
@@ -346,6 +347,8 @@ function GameBoard({
         maxLength={5}
         spellCheck={false}
         value={input}
+        onFocus={() => setIsTyping(true)}
+        onBlur={() => setIsTyping(false)}
         onChange={(event) => onInput(event.target.value)}
         onKeyDown={(event) => {
           if (event.key === "Enter") {
@@ -355,16 +358,17 @@ function GameBoard({
           }
         }}
       />
-      <div className="game-board" aria-label="Word puzzle grid" onClick={focusInput}>
+      <div className={`game-board ${isTyping ? "is-typing" : ""}`} aria-label="Word puzzle grid" onClick={focusInput}>
         {Array.from({ length: 6 }, (_, rowIndex) => {
           const evaluation = evaluations[rowIndex];
           const value = evaluation?.guess ?? (rowIndex === evaluations.length && !disabled ? input : "");
+          const isActiveRow = rowIndex === evaluations.length && !disabled;
           return (
             <div className="tile-row" key={rowIndex}>
               {Array.from({ length: 5 }, (_, colIndex) => (
                 <div
                   key={colIndex}
-                  className={`tile ${evaluation?.states[colIndex] ?? ""} ${value[colIndex] ? "filled" : ""}`}
+                  className={`tile ${evaluation?.states[colIndex] ?? ""} ${value[colIndex] ? "filled" : ""} ${isActiveRow && colIndex === Math.min(input.length, 4) ? "cursor" : ""}`}
                   aria-label={evaluation ? `${value[colIndex]}, ${evaluation.states[colIndex]}` : value[colIndex] || "empty"}
                 >
                   {value[colIndex]?.toUpperCase() ?? ""}

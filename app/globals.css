@@ -51,10 +51,11 @@ h1, h2 { font-family: Georgia, "Times New Roman", serif; letter-spacing: -.025em
 .game-board { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 7px; width: min(100%, 330px); margin: 0 auto; cursor: text; }
 .tile-row { display: contents; }
 .tile { width: 100%; min-width: 0; aspect-ratio: 1; border: 1.5px solid #c9c1b3; background: rgba(255,253,248,.75); display: grid; place-items: center; border-radius: 7px; font-size: clamp(23px, 3vw, 31px); font-weight: 750; box-shadow: 0 3px 10px rgba(61,52,36,.035); }
-.tile.filled { border-color: #8f958f; transform: scale(1.015); }
-.tile.correct { color: white; background: var(--forest-light); border-color: var(--forest-light); }
-.tile.present { color: #322914; background: var(--gold); border-color: var(--gold); }
-.tile.absent { color: white; background: #878a84; border-color: #878a84; }
+.tile.filled { border-color: #878a84; transform: scale(1.015); }
+.tile.cursor { border: 2px solid #6aaa64; box-shadow: 0 0 0 3px rgba(106,170,100,.22), 0 3px 10px rgba(61,52,36,.035); }
+.tile.correct { color: white; background: #6aaa64; border-color: #6aaa64; }
+.tile.present { color: white; background: #c9b458; border-color: #c9b458; }
+.tile.absent { color: white; background: #787c7e; border-color: #787c7e; }
 .message-line { color: var(--clay); text-align: center; font-size: 12px; min-height: 34px; padding: 10px 0 6px; font-weight: 650; }
 .keyboard { display: grid; gap: 6px; width: min(100%, 540px); margin: 4px auto 0; }
 .key-row { display: flex; justify-content: center; gap: 5px; }
@@ -62,9 +63,9 @@ h1, h2 { font-family: Georgia, "Times New Roman", serif; letter-spacing: -.025em
 .key:hover { filter: brightness(.96); }
 .key:active { transform: translateY(2px); box-shadow: none; }
 .key.wide { max-width: 72px; font-size: 9px; }
-.key.correct { background: var(--forest-light); color: white; }
-.key.present { background: var(--gold); color: #29200f; }
-.key.absent { background: #858983; color: white; }
+.key.correct { background: #6aaa64; color: white; }
+.key.present { background: #c9b458; color: white; }
+.key.absent { background: #787c7e; color: white; }
 .choice-card, .result-card { background: var(--white); border: 1px solid var(--line); border-radius: 20px; padding: 32px; text-align: center; box-shadow: var(--shadow); max-width: 570px; margin: 34px auto 0; }
 .choice-icon, .result-icon { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 50%; margin: 0 auto 15px; color: white; background: var(--forest); font-size: 20px; }
 .choice-card h2, .result-card h2 { font-size: 30px; margin: 6px 0 10px; }.choice-card > p:not(.overline), .result-note { color: var(--muted); line-height: 1.6; font-size: 14px; }
