@@ -6,6 +6,7 @@ A polished, private, daily five-letter Bible word game with Google-authenticated
 
 - One global daily puzzle, changing at midnight Eastern time.
 - Solutions are curated five-letter words found in the NIV Bible. Proper names are allowed. The repository stores only individual words and scripture references—not NIV verse text.
+- Guesses use a large English dictionary of more than 12,000 five-letter words, so a valid guess does not need to be a Bible word.
 - Six guesses. Correct, present, and absent letters follow standard Wordle-style duplicate-letter rules.
 - A player's first submitted guess starts their one counted game for that day.
 - Leaving an in-progress game records a loss and a score of 6. The browser warns first; a new page load also closes any unfinished server-side session.

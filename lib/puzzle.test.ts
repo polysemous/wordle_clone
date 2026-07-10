@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { evaluateGuess, puzzleForDate } from "./puzzle";
+import { evaluateGuess, isAllowedGuess, puzzleForDate } from "./puzzle";
 
 describe("evaluateGuess", () => {
   it("handles duplicate letters without over-crediting", () => {
@@ -22,5 +22,13 @@ describe("evaluateGuess", () => {
 describe("puzzleForDate", () => {
   it("is stable for a date", () => {
     expect(puzzleForDate("2026-07-09")).toEqual(puzzleForDate("2026-07-09"));
+  });
+});
+
+describe("isAllowedGuess", () => {
+  it("accepts five-letter words from the expanded English dictionary", () => {
+    expect(isAllowedGuess("zebra")).toBe(true);
+    expect(isAllowedGuess("xylem")).toBe(true);
+    expect(isAllowedGuess("zzzzz")).toBe(false);
   });
 });
