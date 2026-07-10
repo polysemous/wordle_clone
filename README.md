@@ -99,6 +99,7 @@ The application intentionally refuses production requests without a signed, vali
 | `GCP_WORKLOAD_IDENTITY_PROVIDER` | `projects/.../providers/github` |
 | `GCP_DEPLOY_SERVICE_ACCOUNT` | deployment service account email |
 | `GCP_RUNTIME_SERVICE_ACCOUNT` | runtime service account email |
+| `FIRESTORE_DATABASE_ID` | a Firestore database ID, such as `gradetracker` |
 
 The workflow deploys a private service and does not grant user access. IAP access policy remains an explicit Google Cloud configuration step.
 
@@ -108,6 +109,7 @@ The workflow deploys a private service and does not grant user access. IAP acces
 | --- | --- | --- |
 | `DATA_BACKEND` | `firestore` | Selects persistent storage. |
 | `GOOGLE_CLOUD_PROJECT` | Cloud project ID | Used by Application Default Credentials and Firestore. |
+| `FIRESTORE_DATABASE_ID` | Optional named database ID | Uses an existing non-default Firestore database, when configured. |
 | `IAP_AUDIENCE` | Required | Expected signed JWT audience. |
 | `PUZZLE_SEED` | Required secret | Keeps the daily schedule stable. |
 | `PUZZLE_TIME_ZONE` | `America/New_York` | Daily reset and leaderboard calendar. |

@@ -155,7 +155,7 @@ class MemoryStore implements GameStore {
 }
 
 class FirestoreStore implements GameStore {
-  private db = new Firestore();
+  private db = new Firestore({ databaseId: process.env.FIRESTORE_DATABASE_ID });
   private players = this.db.collection("players");
   private plays = this.db.collection("plays");
   private dailyRecords = this.db.collection("dailyRecords");

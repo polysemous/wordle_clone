@@ -12,6 +12,7 @@ env:
   REGION: ${{ vars.GCP_REGION }}
   SERVICE: ${{ vars.CLOUD_RUN_SERVICE }}
   REPOSITORY: ${{ vars.ARTIFACT_REPOSITORY }}
+  FIRESTORE_DATABASE_ID: ${{ vars.FIRESTORE_DATABASE_ID }}
 
 jobs:
   deploy:
@@ -44,6 +45,23 @@ jobs:
             --platform managed \
             --port 8080 \
             --service-account "${{ vars.GCP_RUNTIME_SERVICE_ACCOUNT }}" \
-            --set-env-vars "DATA_BACKEND=firestore,PUZZLE_TIME_ZONE=America/New_York,IAP_AUDIENCE=${IAP_AUDIENCE}" \
+            --no-allow-unauthenticated \
+            --iap \
+            --min-instances 0 \
+            --max-instances 1 \
+            --max 1 \
+            --concurrency 20 \
+            --cpu 1 \
+            --memory 512Mi \
+            --timeout 60s \
+            --cpu-throttling \
+            --no-cpu-boost \
+            --set-env-vars "DATA_BACKEND=firestore,FIRESTORE_DATABASE_ID=${FIRESTORE_DATABASE_ID},PUZZLE_TIME_ZONE=America/New_York,PUZZLE_EPOCH=2026-01-01,IAP_AUDIENCE=${IAP_AUDIENCE}" \
             --set-secrets "PUZZLE_SEED=wordle-puzzle-seed:latest" \
+            --quiet
+          gcloud run services add-iam-policy-binding "$SERVICE" \
+            --project "$PROJECT_ID" \
+            --region "$REGION" \
+            --member "serviceAccount:service-${PROJECT_NUMBER}@gcp-sa-iap.iam.gserviceaccount.com" \
+            --role roles/run.invoker \
             --quiet
