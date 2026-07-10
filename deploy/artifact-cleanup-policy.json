@@ -1,0 +1,17 @@
+[
+  {
+    "name": "delete-versions-older-than-three-days",
+    "action": { "type": "Delete" },
+    "condition": {
+      "tagState": "any",
+      "olderThan": "3d"
+    }
+  },
+  {
+    "name": "keep-one-most-recent-version-per-package",
+    "action": { "type": "Keep" },
+    "mostRecentVersions": {
+      "keepCount": 1
+    }
+  }
+]
