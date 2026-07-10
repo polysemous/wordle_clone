@@ -36,6 +36,12 @@ function seededOrder(cycle: number): PuzzleWord[] {
 }
 
 export function puzzleForDate(puzzleKey: string): PuzzleWord {
+  const override = process.env.PUZZLE_TODAY_OVERRIDE?.toLowerCase();
+  if (puzzleKey === dateKey() && override) {
+    const overridePuzzle = SOLUTION_WORDS.find(({ word }) => word === override);
+    if (!overridePuzzle) throw new Error("PUZZLE_TODAY_OVERRIDE must be a configured solution word.");
+    return overridePuzzle;
+  }
   const offset = Math.max(0, daysBetween(EPOCH, puzzleKey));
   const cycle = Math.floor(offset / SOLUTION_WORDS.length);
   const index = offset % SOLUTION_WORDS.length;

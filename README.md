@@ -115,6 +115,7 @@ The workflow deploys a private service and does not grant user access. IAP acces
 | `PUZZLE_SEED` | Required secret | Keeps the daily schedule stable. |
 | `PUZZLE_TIME_ZONE` | `America/New_York` | Daily reset and leaderboard calendar. |
 | `PUZZLE_EPOCH` | `2026-01-01` | Beginning of the archive schedule. |
+| `PUZZLE_TODAY_OVERRIDE` | Optional solution word | A temporary, configured replacement for the current Eastern-day puzzle only. |
 | `ALLOW_DEV_AUTH` | Never in production | Enables a local mock identity. |
 
 ## Security notes
