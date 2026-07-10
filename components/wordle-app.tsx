@@ -1,12 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type {
   Evaluation,
   GameSnapshot,
   LeaderboardEntry,
   LeaderboardPeriod,
-  LetterState,
   Play,
   Player,
   PlayerProfile,
@@ -35,12 +34,6 @@ interface SessionChoice {
   mode: PlayMode;
   puzzleKey: string;
 }
-
-const KEYS = [
-  ["q", "w", "e", "r", "t", "y", "u", "i", "o", "p"],
-  ["a", "s", "d", "f", "g", "h", "j", "k", "l"],
-  ["enter", "z", "x", "c", "v", "b", "n", "m", "backspace"],
-];
 
 const PERIOD_LABELS: Record<LeaderboardPeriod, string> = {
   today: "Today",
@@ -156,6 +149,12 @@ export function WordleApp() {
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [handleKey]);
 
+  const handleInput = useCallback((value: string) => {
+    if (!session || busy || (game && game.status !== "in-progress")) return;
+    setInput(value.toLowerCase().replace(/[^a-z]/g, "").slice(0, 5));
+    setMessage("");
+  }, [busy, game, session]);
+
   const choosePractice = async (mode: "daily-replay" | "archive") => {
     setBusy(true);
     try {
@@ -225,7 +224,7 @@ export function WordleApp() {
             input={input}
             message={message}
             busy={busy}
-            onKey={handleKey}
+            onInput={handleInput}
             onSubmit={() => void submitGuess()}
             onPractice={choosePractice}
           />
@@ -248,7 +247,7 @@ function GameView({
   input,
   message,
   busy,
-  onKey,
+  onInput,
   onSubmit,
   onPractice,
 }: {
@@ -258,21 +257,12 @@ function GameView({
   input: string;
   message: string;
   busy: boolean;
-  onKey: (key: string) => void;
+  onInput: (value: string) => void;
   onSubmit: () => void;
   onPractice: (mode: "daily-replay" | "archive") => void;
 }) {
   const completed = game && game.status !== "in-progress";
   const rows = useMemo(() => game?.evaluations ?? [], [game?.evaluations]);
-  const keyStates = useMemo(() => {
-    const priority: Record<LetterState, number> = { absent: 1, present: 2, correct: 3 };
-    const states: Record<string, LetterState> = {};
-    rows.forEach((evaluation) => evaluation.guess.split("").forEach((letter, index) => {
-      const state = evaluation.states[index];
-      if (!states[letter] || priority[state] > priority[states[letter]]) states[letter] = state;
-    }));
-    return states;
-  }, [rows]);
 
   return (
     <section className="game-layout">
@@ -294,11 +284,8 @@ function GameView({
             {!game && session.mode !== "daily" && (
               <div className="practice-note"><span>Practice round</span>This game is just for fun and will not change the leaderboard.</div>
             )}
-            <GameBoard evaluations={rows} input={input} disabled={Boolean(completed)} />
-            <div className="message-line" aria-live="polite">{message || (game?.counted === false ? "Practice scores never affect your ranking." : "\u00A0")}</div>
-            {!completed && (
-              <Keyboard keyStates={keyStates} onKey={onKey} onSubmit={onSubmit} busy={busy} />
-            )}
+            <GameBoard evaluations={rows} input={input} disabled={Boolean(completed) || busy} onInput={onInput} onSubmit={onSubmit} />
+            <div className="message-line" aria-live="polite">{message || (game?.counted === false ? "Practice scores never affect your ranking." : !completed ? "Tap a tile to type a guess." : "\u00A0")}</div>
             {completed && <ResultCard game={game} onPractice={onPractice} busy={busy} />}
           </>
         )}
@@ -318,48 +305,66 @@ function GameView({
   );
 }
 
-function GameBoard({ evaluations, input, disabled }: { evaluations: Evaluation[]; input: string; disabled: boolean }) {
-  return (
-    <div className="game-board" aria-label="Word puzzle grid">
-      {Array.from({ length: 6 }, (_, rowIndex) => {
-        const evaluation = evaluations[rowIndex];
-        const value = evaluation?.guess ?? (rowIndex === evaluations.length && !disabled ? input : "");
-        return (
-          <div className="tile-row" key={rowIndex}>
-            {Array.from({ length: 5 }, (_, colIndex) => (
-              <div
-                key={colIndex}
-                className={`tile ${evaluation?.states[colIndex] ?? ""} ${value[colIndex] ? "filled" : ""}`}
-                aria-label={evaluation ? `${value[colIndex]}, ${evaluation.states[colIndex]}` : value[colIndex] || "empty"}
-              >
-                {value[colIndex]?.toUpperCase() ?? ""}
-              </div>
-            ))}
-          </div>
-        );
-      })}
-    </div>
-  );
-}
+function GameBoard({
+  evaluations,
+  input,
+  disabled,
+  onInput,
+  onSubmit,
+}: {
+  evaluations: Evaluation[];
+  input: string;
+  disabled: boolean;
+  onInput: (value: string) => void;
+  onSubmit: () => void;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const focusInput = () => {
+    if (!disabled) inputRef.current?.focus();
+  };
 
-function Keyboard({ keyStates, onKey, onSubmit, busy }: { keyStates: Record<string, LetterState>; onKey: (key: string) => void; onSubmit: () => void; busy: boolean }) {
   return (
-    <div className="keyboard" aria-label="On-screen keyboard">
-      {KEYS.map((row, rowIndex) => (
-        <div className="key-row" key={rowIndex}>
-          {row.map((key) => (
-            <button
-              key={key}
-              className={`key ${keyStates[key] ?? ""} ${key.length > 1 ? "wide" : ""}`}
-              onClick={() => key === "enter" ? onSubmit() : onKey(key)}
-              disabled={busy}
-              aria-label={key}
-            >
-              {key === "backspace" ? "⌫" : key.toUpperCase()}
-            </button>
-          ))}
-        </div>
-      ))}
+    <div className="game-board-shell">
+      <input
+        ref={inputRef}
+        className="guess-input"
+        aria-label="Type a five-letter guess"
+        autoCapitalize="characters"
+        autoComplete="off"
+        autoCorrect="off"
+        enterKeyHint="done"
+        inputMode="text"
+        maxLength={5}
+        spellCheck={false}
+        value={input}
+        onChange={(event) => onInput(event.target.value)}
+        onKeyDown={(event) => {
+          if (event.key === "Enter") {
+            event.preventDefault();
+            event.stopPropagation();
+            onSubmit();
+          }
+        }}
+      />
+      <div className="game-board" aria-label="Word puzzle grid" onClick={focusInput}>
+        {Array.from({ length: 6 }, (_, rowIndex) => {
+          const evaluation = evaluations[rowIndex];
+          const value = evaluation?.guess ?? (rowIndex === evaluations.length && !disabled ? input : "");
+          return (
+            <div className="tile-row" key={rowIndex}>
+              {Array.from({ length: 5 }, (_, colIndex) => (
+                <div
+                  key={colIndex}
+                  className={`tile ${evaluation?.states[colIndex] ?? ""} ${value[colIndex] ? "filled" : ""}`}
+                  aria-label={evaluation ? `${value[colIndex]}, ${evaluation.states[colIndex]}` : value[colIndex] || "empty"}
+                >
+                  {value[colIndex]?.toUpperCase() ?? ""}
+                </div>
+              ))}
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
