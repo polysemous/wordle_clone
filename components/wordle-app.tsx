@@ -310,17 +310,6 @@ function GameView({
           </>
         )}
       </div>
-      <aside className="side-card rules-card">
-        <span className="decorative-cross">✦</span>
-        <p className="overline">How it works</p>
-        <h2>A quiet daily ritual</h2>
-        <ol>
-          <li><span>1</span><p>Guess the five-letter Bible word in six tries.</p></li>
-          <li><span>2</span><p>Gold means the right letter and place. Clay means the letter is elsewhere.</p></li>
-          <li><span>3</span><p>Only your first game today counts toward the leaderboard.</p></li>
-        </ol>
-        <div className="mini-tiles" aria-hidden="true"><i className="correct">G</i><i className="present">R</i><i>A</i><i>C</i><i>E</i></div>
-      </aside>
     </section>
   );
 }
