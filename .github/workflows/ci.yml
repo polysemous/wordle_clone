@@ -24,3 +24,5 @@ jobs:
       - run: pnpm lint
       - run: pnpm test
       - run: pnpm build
+      - name: Build Cloud Run container
+        run: docker build -t wordle-clone:ci .
