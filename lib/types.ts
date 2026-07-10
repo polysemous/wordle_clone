@@ -67,4 +67,5 @@ export interface GameSnapshot {
   score: number | null;
   solution?: string;
   reference?: string;
+  verse?: string;
 }

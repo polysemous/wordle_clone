@@ -8,6 +8,7 @@ import {
   normalizeGuess,
   puzzleForDate,
 } from "@/lib/puzzle";
+import { webVerseForReference } from "@/lib/scripture";
 import type { GameSnapshot, PlayMode } from "@/lib/types";
 
 interface GuessBody {
@@ -65,6 +66,10 @@ export async function POST(request: Request) {
     };
     await store.savePlay(play);
 
+    const verse = status !== "in-progress"
+      ? await webVerseForReference(puzzle.reference).catch(() => undefined)
+      : undefined;
+
     const snapshot: GameSnapshot = {
       playId: play.id,
       puzzleKey: play.puzzleKey,
@@ -74,7 +79,7 @@ export async function POST(request: Request) {
       evaluations: play.evaluations,
       score: play.score,
       ...(status !== "in-progress"
-        ? { solution: puzzle.word, reference: puzzle.reference }
+        ? { solution: puzzle.word, reference: puzzle.reference, verse }
         : {}),
     };
     return NextResponse.json(snapshot);

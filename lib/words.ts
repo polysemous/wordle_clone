@@ -1,8 +1,7 @@
 import englishWords from "an-array-of-english-words";
 import type { PuzzleWord } from "./types";
 
-// Curated NIV vocabulary. Only individual words and references are stored; no
-// copyrighted verse text is reproduced. Proper names are intentionally allowed.
+// Curated five-letter Bible vocabulary. Proper names are intentionally allowed.
 export const SOLUTION_WORDS: PuzzleWord[] = [
   { word: "aaron", reference: "Exodus 4:14" },
   { word: "abram", reference: "Genesis 12:1" },

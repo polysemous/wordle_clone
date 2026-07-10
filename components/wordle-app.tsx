@@ -291,7 +291,7 @@ function GameView({
           {session?.mode !== "daily" && <span className="practice-badge">Practice</span>}
         </div>
         <h1>{session?.mode === "archive" ? "A word from the archive" : "Today’s five-letter word"}</h1>
-        <p className="intro">Every answer appears in the NIV Bible. Proper names are fair game.</p>
+        <p className="intro">Every answer appears in the Bible. Proper names are fair game.</p>
 
         {!session ? (
           <PracticeChoice countedToday={bootstrap.countedToday} onPractice={onPractice} busy={busy} />
@@ -420,8 +420,9 @@ function ResultCard({ game, onPractice, busy }: { game: GameSnapshot; onPractice
   return (
     <div className="result-card" aria-live="polite">
       <span className="result-icon">{won ? "✦" : "·"}</span>
-      <div><p className="overline">{won ? "Beautifully done" : "The word was"}</p><h2>{game.solution?.toUpperCase()}</h2><p className="reference">{game.reference} · NIV reference</p></div>
+      <div><p className="overline">{won ? "Beautifully done" : "The word was"}</p><h2>{game.solution?.toUpperCase()}</h2>{!game.verse && <p className="reference">{game.reference} · WEB</p>}</div>
       <div className="result-score"><strong>{won ? game.score : 6}</strong><span>{won ? "guesses" : "recorded"}</span></div>
+      {game.verse && <blockquote className="verse-text">“{game.verse}”<cite>{game.reference} · WEB</cite></blockquote>}
       <p className="result-note">{game.counted ? "This result counts toward your leaderboard standing." : "A practice result—your leaderboard score stays unchanged."}</p>
       <div className="choice-actions">
         <button className="primary-button" disabled={busy} onClick={() => onPractice("daily-replay")}>Play today again</button>
