@@ -37,7 +37,8 @@ function seededOrder(cycle: number): PuzzleWord[] {
 
 export function puzzleForDate(puzzleKey: string): PuzzleWord {
   const override = process.env.PUZZLE_TODAY_OVERRIDE?.toLowerCase();
-  if (puzzleKey === dateKey() && override) {
+  const overrideDate = process.env.PUZZLE_TODAY_OVERRIDE_DATE;
+  if (puzzleKey === dateKey() && overrideDate === puzzleKey && override) {
     const overridePuzzle = SOLUTION_WORDS.find(({ word }) => word === override);
     if (!overridePuzzle) throw new Error("PUZZLE_TODAY_OVERRIDE must be a configured solution word.");
     return overridePuzzle;
