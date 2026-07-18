@@ -295,7 +295,7 @@ function GameView({
         <p className="intro">Every answer appears in the Bible. Proper names are fair game.</p>
 
         {!session ? (
-          <PracticeChoice countedToday={bootstrap.countedToday} onPractice={onPractice} busy={busy} />
+          <PracticeChoice countedToday={bootstrap.countedToday} playerName={bootstrap.player.displayName} onPractice={onPractice} busy={busy} />
         ) : (
           <>
             {!game && session.mode === "daily" && (
@@ -405,7 +405,10 @@ function Keyboard({ keyStates, onKey, onSubmit, busy }: { keyStates: Record<stri
   );
 }
 
-function PracticeChoice({ countedToday, onPractice, busy }: { countedToday: Play | null; onPractice: (mode: "daily-replay" | "archive") => void; busy: boolean }) {
+function PracticeChoice({ countedToday, playerName, onPractice, busy }: { countedToday: Play | null; playerName: string; onPractice: (mode: "daily-replay" | "archive") => void; busy: boolean }) {
+  const shareScore = countedToday?.status === "won" && typeof countedToday.score === "number"
+    ? countedToday.score
+    : null;
   return (
     <div className="choice-card">
       <span className="choice-icon">✓</span>
@@ -413,6 +416,7 @@ function PracticeChoice({ countedToday, onPractice, busy }: { countedToday: Play
       <h2>{countedToday?.status === "won" ? `Solved in ${countedToday.score}` : "Today counts as 6"}</h2>
       <p>You’re welcome to keep playing. Additional games are practice only and will not affect the leaderboard.</p>
       <div className="choice-actions">
+        {shareScore !== null && <ShareResultButton playerName={playerName} score={shareScore} />}
         <button className="primary-button" disabled={busy} onClick={() => onPractice("daily-replay")}>Play today’s word again</button>
         <button className="secondary-button" disabled={busy} onClick={() => onPractice("archive")}>Surprise me with a past word</button>
       </div>
@@ -422,12 +426,32 @@ function PracticeChoice({ countedToday, onPractice, busy }: { countedToday: Play
 
 function ResultCard({ game, playerName, onPractice, busy }: { game: GameSnapshot; playerName: string; onPractice: (mode: "daily-replay" | "archive") => void; busy: boolean }) {
   const won = game.status === "won";
-  const canShare = won && game.counted && game.mode === "daily" && typeof game.score === "number";
+  const shareScore = won && game.counted && game.mode === "daily" && typeof game.score === "number"
+    ? game.score
+    : null;
+
+  return (
+    <div className="result-card" aria-live="polite">
+      <span className="result-icon">{won ? "✦" : "·"}</span>
+      <div><p className="overline">{won ? "Beautifully done" : "The word was"}</p><h2>{game.solution?.toUpperCase()}</h2>{!game.verse && <p className="reference">{game.reference} · WEB</p>}</div>
+      <div className="result-score"><strong>{won ? game.score : 6}</strong><span>{won ? "guesses" : "recorded"}</span></div>
+      {game.verse && <blockquote className="verse-text">“{game.verse}”<cite>{game.reference} · WEB</cite></blockquote>}
+      <p className="result-note">{game.counted ? "This result counts toward your leaderboard standing." : "A practice result—your leaderboard score stays unchanged."}</p>
+      <div className="choice-actions">
+        {shareScore !== null && <ShareResultButton playerName={playerName} score={shareScore} />}
+        <button className="primary-button" disabled={busy} onClick={() => onPractice("daily-replay")}>Play today again</button>
+        <button className="secondary-button" disabled={busy} onClick={() => onPractice("archive")}>Random past puzzle</button>
+      </div>
+    </div>
+  );
+}
+
+function ShareResultButton({ playerName, score }: { playerName: string; score: number }) {
   const [shareMessage, setShareMessage] = useState("");
 
   const shareResult = async () => {
-    if (!canShare || typeof game.score !== "number" || typeof window === "undefined") return;
-    const text = dailyShareText(playerName, game.score);
+    if (typeof window === "undefined") return;
+    const text = dailyShareText(playerName, score);
     const url = window.location.origin;
     setShareMessage("");
 
@@ -450,17 +474,8 @@ function ResultCard({ game, playerName, onPractice, busy }: { game: GameSnapshot
   };
 
   return (
-    <div className="result-card" aria-live="polite">
-      <span className="result-icon">{won ? "✦" : "·"}</span>
-      <div><p className="overline">{won ? "Beautifully done" : "The word was"}</p><h2>{game.solution?.toUpperCase()}</h2>{!game.verse && <p className="reference">{game.reference} · WEB</p>}</div>
-      <div className="result-score"><strong>{won ? game.score : 6}</strong><span>{won ? "guesses" : "recorded"}</span></div>
-      {game.verse && <blockquote className="verse-text">“{game.verse}”<cite>{game.reference} · WEB</cite></blockquote>}
-      <p className="result-note">{game.counted ? "This result counts toward your leaderboard standing." : "A practice result—your leaderboard score stays unchanged."}</p>
-      <div className="choice-actions">
-        {canShare && <button className="secondary-button" onClick={() => void shareResult()}>Share result</button>}
-        <button className="primary-button" disabled={busy} onClick={() => onPractice("daily-replay")}>Play today again</button>
-        <button className="secondary-button" disabled={busy} onClick={() => onPractice("archive")}>Random past puzzle</button>
-      </div>
+    <div className="share-control">
+      <button className="secondary-button" onClick={() => void shareResult()}>Share result</button>
       {shareMessage && <p className="share-message" role="status">{shareMessage}</p>}
     </div>
   );
