@@ -453,12 +453,24 @@ function ShareResultButton({ playerName, score }: { playerName: string; score: n
     if (typeof window === "undefined") return;
     const text = dailyShareText(playerName, score);
     const url = window.location.origin;
+    const shareBody = `${text}\n${url}`;
     setShareMessage("");
 
     const isIPhone = /iPad|iPhone|iPod/.test(navigator.userAgent)
       || (navigator.userAgent.includes("Mac") && navigator.maxTouchPoints > 1);
     if (isIPhone) {
       window.location.assign(iPhoneMessageUrl(playerName, score, url));
+      return;
+    }
+
+    const isMac = navigator.userAgent.includes("Macintosh");
+    if (isMac) {
+      try {
+        await navigator.clipboard.writeText(shareBody);
+        setShareMessage("Result copied — open Messages and paste it to send.");
+      } catch {
+        setShareMessage("Copying is unavailable in this browser.");
+      }
       return;
     }
 
@@ -473,7 +485,7 @@ function ShareResultButton({ playerName, score }: { playerName: string; score: n
     }
 
     try {
-      await navigator.clipboard.writeText(`${text}\n${url}`);
+      await navigator.clipboard.writeText(shareBody);
       setShareMessage("Result copied — paste it anywhere you’d like to share.");
     } catch {
       setShareMessage("Sharing is unavailable in this browser.");
