@@ -13,7 +13,7 @@ import type {
   PlayerStats,
   PlayMode,
 } from "@/lib/types";
-import { dailyShareText } from "@/lib/share";
+import { dailyShareText, iPhoneMessageUrl } from "@/lib/share";
 
 type Tab = "game" | "leaderboard" | "stats";
 type BoardKind = "mostSolved" | "bestAverage";
@@ -454,6 +454,13 @@ function ShareResultButton({ playerName, score }: { playerName: string; score: n
     const text = dailyShareText(playerName, score);
     const url = window.location.origin;
     setShareMessage("");
+
+    const isIPhone = /iPad|iPhone|iPod/.test(navigator.userAgent)
+      || (navigator.userAgent.includes("Mac") && navigator.maxTouchPoints > 1);
+    if (isIPhone) {
+      window.location.assign(iPhoneMessageUrl(playerName, score, url));
+      return;
+    }
 
     if (navigator.share) {
       try {

@@ -3,3 +3,8 @@ export function dailyShareText(playerName: string, score: number): string {
   const moves = `${score}/6 ${score === 1 ? "move" : "moves"}`;
   return `${name} solved today’s Daily Word in ${moves}! See if you can do better!`;
 }
+
+export function iPhoneMessageUrl(playerName: string, score: number, url: string): string {
+  const body = `${dailyShareText(playerName, score)}\n${url}`;
+  return `sms:&body=${encodeURIComponent(body)}`;
+}
