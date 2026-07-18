@@ -13,6 +13,7 @@ import type {
   PlayerStats,
   PlayMode,
 } from "@/lib/types";
+import { dailyShareText } from "@/lib/share";
 
 type Tab = "game" | "leaderboard" | "stats";
 type BoardKind = "mostSolved" | "bestAverage";
@@ -306,7 +307,7 @@ function GameView({
             <GameBoard evaluations={rows} input={input} disabled={Boolean(completed) || busy} onInput={onInput} onSubmit={onSubmit} />
             <div className="message-line" aria-live="polite">{message || (game?.counted === false ? "Practice scores never affect your ranking." : !completed ? "Tap a tile to type a guess." : "\u00A0")}</div>
             {!completed && <Keyboard keyStates={keyStates} onKey={onKey} onSubmit={onSubmit} busy={busy} />}
-            {completed && <ResultCard game={game} onPractice={onPractice} busy={busy} />}
+            {completed && <ResultCard game={game} playerName={bootstrap.player.displayName} onPractice={onPractice} busy={busy} />}
           </>
         )}
       </div>
@@ -419,8 +420,35 @@ function PracticeChoice({ countedToday, onPractice, busy }: { countedToday: Play
   );
 }
 
-function ResultCard({ game, onPractice, busy }: { game: GameSnapshot; onPractice: (mode: "daily-replay" | "archive") => void; busy: boolean }) {
+function ResultCard({ game, playerName, onPractice, busy }: { game: GameSnapshot; playerName: string; onPractice: (mode: "daily-replay" | "archive") => void; busy: boolean }) {
   const won = game.status === "won";
+  const canShare = won && game.counted && game.mode === "daily" && typeof game.score === "number";
+  const [shareMessage, setShareMessage] = useState("");
+
+  const shareResult = async () => {
+    if (!canShare || typeof game.score !== "number" || typeof window === "undefined") return;
+    const text = dailyShareText(playerName, game.score);
+    const url = window.location.origin;
+    setShareMessage("");
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: "Daily Word", text, url });
+        setShareMessage("Ready to send.");
+        return;
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") return;
+      }
+    }
+
+    try {
+      await navigator.clipboard.writeText(`${text}\n${url}`);
+      setShareMessage("Result copied — paste it anywhere you’d like to share.");
+    } catch {
+      setShareMessage("Sharing is unavailable in this browser.");
+    }
+  };
+
   return (
     <div className="result-card" aria-live="polite">
       <span className="result-icon">{won ? "✦" : "·"}</span>
@@ -429,9 +457,11 @@ function ResultCard({ game, onPractice, busy }: { game: GameSnapshot; onPractice
       {game.verse && <blockquote className="verse-text">“{game.verse}”<cite>{game.reference} · WEB</cite></blockquote>}
       <p className="result-note">{game.counted ? "This result counts toward your leaderboard standing." : "A practice result—your leaderboard score stays unchanged."}</p>
       <div className="choice-actions">
+        {canShare && <button className="secondary-button" onClick={() => void shareResult()}>Share result</button>}
         <button className="primary-button" disabled={busy} onClick={() => onPractice("daily-replay")}>Play today again</button>
         <button className="secondary-button" disabled={busy} onClick={() => onPractice("archive")}>Random past puzzle</button>
       </div>
+      {shareMessage && <p className="share-message" role="status">{shareMessage}</p>}
     </div>
   );
 }
